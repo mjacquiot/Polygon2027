@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POLYGON 2027 — Modélisation des Programmes Présidentiels</title>
+  
+  <meta name="description" content="Plateforme d'analyse et de visualisation multidimensionnelle des programmes pour l'élection présidentielle 2027.">
+  <meta name="theme-color" content="#FFFFFF">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/polygon.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,27 95,73 50,95 5,73 5,27' fill='none' stroke='%232563EB' stroke-width='8'/><circle cx='50' cy='50' r='12' fill='%232563EB'/></svg>">
+</head>
+<body>
+
+  <!-- Fond Vectoriel Discret -->
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="app-container">
+
+    <!-- HEADER MINIMALISTE TOUJOURS VISIBLE -->
+    <header class="header">
+      <a href="#" class="brand">
+        <div class="brand-icon"></div>
+        <div class="brand-title">POLYGON 2027</div>
+      </a>
+
+      <!-- SWITCHER SYNTHÈSE / DÉTAILLÉ TRÈS VISIBLE -->
+      <nav class="header-nav">
+        <div class="mode-toggle-group">
+          <button id="tab-synthesis" class="mode-toggle-btn active">
+            <span>🎯 Synthèse</span>
+            <span class="badge-pill">8 thèmes</span>
+          </button>
+          <button id="tab-expert" class="mode-toggle-btn">
+            <span>🔬 Détaillé</span>
+            <span class="badge-pill">18 thèmes</span>
+          </button>
+        </div>
+
+        <!-- Modes Solo, Superposition, Mon Profil -->
+        <div class="mode-toggle-group">
+          <button id="btn-mode-single" class="mode-toggle-btn active">Solo</button>
+          <button id="btn-mode-compare" class="mode-toggle-btn">Superposition</button>
+          <button id="btn-mode-matching" class="mode-toggle-btn" style="color: var(--cand-blue);">Mon Profil</button>
+        </div>
+      </nav>
+
+      <!-- Bouton Export PNG -->
+      <div class="header-actions">
+        <button id="export-btn" class="btn-action btn-primary" title="Exporter l'image">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Exporter HD
+        </button>
+      </div>
+    </header>
+
+    <!-- CORPS DE L'APPLICATION -->
+    <div class="main-layout">
+
+      <!-- BARRE GAUCHE : SÉLECTION COMPACTE DES CANDIDATS (230px) -->
+      <aside class="sidebar-left">
+        <div class="sidebar-header">
+          <div class="sidebar-title">CANDIDATS 2027</div>
+          <div class="sidebar-scroll-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="5" y="2" width="14" height="20" rx="7"></rect>
+              <line x1="12" y1="6" x2="12" y2="10"></line>
+            </svg>
+            Molette sur le graphe = Défiler
+          </div>
+        </div>
+
+        <div id="candidates-list" class="candidates-list">
+          <!-- Injecté dynamiquement par app.js -->
+        </div>
+      </aside>
+
+      <!-- ARÈNE CENTRALE : LE POLYGONE PREND TOUT L'ESPACE RESTANT -->
+      <main class="radar-arena" id="radar-arena">
+        
+        <!-- Fiche Flottante Discrète du Candidat Actif -->
+        <div id="floating-card" class="floating-candidate-card">
+          <img id="floating-avatar" class="floating-avatar" src="" alt="">
+          <div>
+            <div id="floating-name" class="floating-name">Candidat</div>
+            <div id="floating-sub" class="floating-sub">Programme 2027</div>
+          </div>
+        </div>
+
+        <!-- Raccourci Flottant pour Basculer vers Mode Détaillé -->
+        <button id="floating-toggle-view" class="floating-mode-pill">
+          🔬 Passer au Mode Détaillé (18 axes) ➔
+        </button>
+
+        <!-- Canvas Radar -->
+        <canvas id="radar-canvas"></canvas>
+
+        <!-- Tooltip Interactif -->
+        <div id="radar-tooltip" class="radar-tooltip"></div>
+
+        <!-- Dock Flottant Mode Matching (Toutes les Affinités en Direct) -->
+        <div id="matching-dock" class="matching-dock" style="display: none;">
+          <div class="matching-dock-label">🎯 Affinités :</div>
+          <div id="matching-pills" class="matching-pills-scroll">
+            <!-- Injecté par app.js : TOUS les candidats avec % -->
+          </div>
+          <button id="toggle-sliders-btn" class="btn-action" style="height: 28px; padding: 0 10px; font-size: 11px; flex-shrink: 0;">
+            Sliders
+          </button>
+        </div>
+
+      </main>
+
+    </div>
+
+    <!-- TIROIR ESCAMOTABLE : SLIDERS DE PRÉCISION -->
+    <div id="slider-drawer" class="slider-drawer">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-family: var(--font-display); font-size: 13px; font-weight: 700;">Ajustement Précis des Axes</span>
+        <button id="close-drawer-btn" class="btn-action" style="height: 26px; padding: 0 8px;">✕ Fermer</button>
+      </div>
+      <div id="slider-grid" class="slider-grid">
+        <!-- Sliders injectés par app.js -->
+      </div>
+    </div>
+
+    <!-- MODALE EXPORT PNG -->
+    <div id="export-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-family: var(--font-display); font-size: 15px; font-weight: 700;">Exportation Graphique HD</h3>
+          <button id="modal-close" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+        </div>
+        <div class="export-preview">
+          <img id="export-preview-img" src="" alt="Aperçu export">
+        </div>
+        <button id="download-png-btn" class="btn-action btn-primary" style="justify-content: center; height: 38px;">
+          Télécharger l'image PNG
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="data/data.js"></script>
+  <script src="js/background.js"></script>
+  <script src="js/radar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
